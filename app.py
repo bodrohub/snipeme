@@ -1,18 +1,22 @@
 import streamlit as st
-import requests
-from datetime import datetime, timezone
-import math
 
 st.set_page_config(page_title="SnipeMe", page_icon="🎯", layout="wide")
 
+# CSS BENER - yang rusak kemarin gue benerin
 st.markdown("""
 <style>
-.stApp { background-color: #1f352d; color: white; }
-h1,h2,h3,p,span,label { color: white !important; }
+.stApp { background-color: #1f352d !important; }
+section[data-testid="stSidebar"] { background-color: #16281f !important; }
+section[data-testid="stSidebar"] label, section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3, section[data-testid="stSidebar"] p { color: white !important; }
+h1, h2, h3, p, span { color: white !important; }
 div[data-testid="stTextInput"] input, div[data-testid="stNumberInput"] input {
-    border: 3px solid #ff6a00 !important; background: #2a4a3e !important; color: white !important;
+    border: 3px solid #ff6a00 !important; background-color: #2a4a3e !important; color: white !important;
 }
-.stButton > button { background: #ff3b30 !important; color: white !important; border: 2px solid #ff6a00 !important; font-weight: bold; width: 100%; }
+div[data-testid="stNumberInput"] button { background-color: #ff6a00 !important; color: white !important; }
+a[data-testid="stLinkButton"] { background-color: #ff3b30 !important; color: white !important; border: 2px solid #ff6a00 !important; }
+a[data-testid="stLinkButton"] p { color: white !important; font-weight: bold !important; }
+button[data-testid="stBaseButton-secondary"] { background-color: #ff3b30 !important; color: white !important; border: 2px solid #ff6a00 !important; }
+button[data-testid="stBaseButton-secondary"] p { color: white !important; font-weight: bold !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -33,16 +37,8 @@ with st.sidebar:
     cari = st.button("🔍 CARI")
 
 if cari:
-    st.subheader("Hasil Pencarian")
-    api_key = st.secrets.get("YOUTUBE_API_KEY", "")
-    if not api_key:
-        st.warning("Belum ada API Key. Masuk ke Streamlit -> Settings -> Secrets, isi YOUTUBE_API_KEY")
-        st.info(f"Contoh hasil untuk: {keyword} | Views {views_min}-{views_max} | VPH > {vph_min} | Durasi {durasi_min}-{durasi_max} menit")
-    else:
-        st.success("API tersambung! Hasil asli dari YouTube akan muncul di sini.")
-    
-    # Export contoh
+    st.success(f"Nyari: {keyword} | Views {views_min}-{views_max} | VPH > {vph_min} | Durasi {durasi_min}-{durasi_max} menit | {tanggal}")
     txt = f"SnipeMe - {keyword}\nViews: {views_min}-{views_max} | VPH > {vph_min}\n"
     st.download_button("⬇️ Export txt/md", txt, file_name="snipeme.txt")
 else:
-    st.info("Isi filter di kiri, terus klik CARI. 👈")
+    st.info("Isi filter di kiri, terus klik CARI 👈")
