@@ -4,18 +4,21 @@ st.set_page_config(page_title="SnipeMe", page_icon="🎯", layout="wide")
 
 st.markdown("""
 <style>
+/* SEMUA TEKS OREN TEBAL */
+.stApp, .stApp *, section[data-testid="stSidebar"], section[data-testid="stSidebar"] *, h1, h2, h3, p, span, label, div {
+    color: #ff6a00 !important;
+    font-weight: bold !important;
+}
 .stApp { background-color: #033333 !important; }
 section[data-testid="stSidebar"] { background-color: #022222 !important; }
-section[data-testid="stSidebar"] label, section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3, section[data-testid="stSidebar"] p { color: white !important; }
-h1, h2, h3, p, span { color: white !important; }
 div[data-testid="stTextInput"] input, div[data-testid="stNumberInput"] input {
-    border: 3px solid #ff6a00 !important; background-color: #044444 !important; color: white !important;
+    border: 3px solid #ff6a00 !important; background-color: #044444 !important; color: #ff6a00 !important; font-weight: bold !important;
 }
-div[data-testid="stNumberInput"] button { background-color: #ff6a00 !important; color: white !important; }
-a[data-testid="stLinkButton"] { background-color: #ff3b30 !important; color: white !important; border: 2px solid #ff6a00 !important; }
-a[data-testid="stLinkButton"] p { color: white !important; font-weight: bold !important; }
-button[data-testid="stBaseButton-secondary"] { background-color: #ff3b30 !important; color: white !important; border: 2px solid #ff6a00 !important; }
-button[data-testid="stBaseButton-secondary"] p { color: white !important; font-weight: bold !important; }
+div[data-testid="stNumberInput"] button { background-color: #ff6a00 !important; color: #033333 !important; font-weight: bold !important; }
+a[data-testid="stLinkButton"] { background-color: #ff3b30 !important; border: 2px solid #ff6a00 !important; }
+a[data-testid="stLinkButton"] p { color: #ff6a00 !important; font-weight: bold !important; }
+button[data-testid="stBaseButton-secondary"] { background-color: #ff3b30 !important; border: 2px solid #ff6a00 !important; }
+button[data-testid="stBaseButton-secondary"] p { color: #ff6a00 !important; font-weight: bold !important; }
 /* Banner SnipeMe - #004D4D */
 .banner-snipe {
     background-color: #004D4D !important;
@@ -25,7 +28,7 @@ button[data-testid="stBaseButton-secondary"] p { color: white !important; font-w
     margin-bottom: 18px !important;
     border: 3px solid #ff6a00 !important;
 }
-.banner-snipe h1 { color: #ff6a00 !important; margin: 0 !important; font-size: 38px !important; }
+.banner-snipe h1 { color: #ff6a00 !important; margin: 0 !important; font-size: 38px !important; font-weight: bold !important; }
 .banner-snipe p { color: #ff6a00 !important; margin: 0 !important; font-weight: bold !important; }
 </style>
 """, unsafe_allow_html=True)
