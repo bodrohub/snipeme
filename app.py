@@ -3,14 +3,13 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="SnipeMe", page_icon="🎯", layout="wide")
 
-# ========== POPUP 1x SAJA - DARI AWAL UDAH ADA 3 TOMBOL DI DALAM ==========
+# ========== POPUP 1x SAJA - 80% LAYAR, PAS DI TENGAH ==========
 if "masuk" not in st.session_state: st.session_state.masuk = False
 if "popup_start" not in st.session_state: st.session_state.popup_start = time.time()
 
 if not st.session_state.masuk:
     sisa = 6 - int(time.time() - st.session_state.popup_start)
     if sisa < 0: sisa = 0
-    # 1 POPUP SAJA, GAK GANTI-GANTI. CUMA ANGKA DETIK & STATUS TOMBOL YANG GANTI
     if sisa > 0:
         teks_timer = f"Donasi dulu coy, app kebuka dalam {sisa} detik..."
         teks_tombol = f"Tombol MASUK aktif setelah {sisa} detik, gak bisa di-skip!"
@@ -21,17 +20,40 @@ if not st.session_state.masuk:
     st.markdown(f"""
     <style>
     .stApp{{background-color:#033333 !important;}}
-    /* 1 KOTAK SAJA, 80% TENGAH, UKURAN TETAP */
-    .popup-satu{{width:80%;margin:40px auto 0 auto;background:#004D4D;border:4px solid #ff6a00;border-radius:16px;padding:60px 20px 110px 20px;text-align:center;}}
-    .popup-satu h1{{color:#ff6a00 !important;font-size:48px;margin:0;}} .popup-satu p{{color:white !important;font-size:22px;font-weight:bold;}}
-    /* TOMBOL DITARIK MASUK KE DALAM KOTAK, POSISI TETAP */
-    div[data-testid="stHorizontalBlock"]{{width:80% !important;margin:-95px auto 0 auto !important;position:relative;z-index:10;}}
+    /* BACKGROUND GELAP FULL LAYAR */
+    .popup-bg{{position:fixed;inset:0;background:#033333;z-index:9998;}}
+    /* KOTAK POPUP: 80% LEBAR x 80% TINGGI, PAS DI TENGAH LAYAR */
+    .popup-satu{{
+        position:fixed !important;
+        top:50% !important; left:50% !important;
+        transform:translate(-50%,-50%) !important;
+        width:80vw !important; height:80vh !important;
+        background:#004D4D !important;
+        border:4px solid #ff6a00 !important;
+        border-radius:16px !important;
+        display:flex !important; flex-direction:column !important;
+        justify-content:center !important; align-items:center !important;
+        text-align:center !important; z-index:9999 !important;
+        padding:20px !important;
+    }}
+    .popup-satu h1{{color:#ff6a00 !important;font-size:48px;margin:0;}}
+    .popup-satu p{{color:white !important;font-size:22px;font-weight:bold;}}
+    /* TOMBOL: JUGA FIXED, DI TENGAH, NEMPEL DI DALAM KOTAK BAGIAN BAWAH */
+    div[data-testid="stHorizontalBlock"]{{
+        position:fixed !important;
+        top:calc(50% + 28vh) !important;
+        left:50% !important;
+        transform:translateX(-50%) !important;
+        width:76vw !important;
+        z-index:10000 !important;
+    }}
     div[data-testid="stLinkButton"] > a {{background-color:#ff8c00 !important;border:2px solid #ff6a00 !important;height:55px !important;border-radius:10px !important;}}
     div[data-testid="stLinkButton"] p{{color:white !important;font-size:18px !important;font-weight:bold !important;}}
     button[data-testid="stBaseButton-secondary"]{{background-color:#00e676 !important;border:2px solid #ff6a00 !important;height:55px !important;border-radius:10px !important;}}
     button[data-testid="stBaseButton-secondary"] p{{color:#ff3b30 !important;font-size:18px !important;font-weight:bold !important;}}
     button[data-testid="stBaseButton-secondary"]:disabled{{background-color:#555555 !important;opacity:0.6;}}
     </style>
+    <div class="popup-bg"></div>
     <div class="popup-satu"><h1>🎯 SnipeMe</h1><p>Dukung biar tetap gratis! 🙏</p><p>{teks_timer}</p><p>{teks_tombol}</p></div>
     """, unsafe_allow_html=True)
 
@@ -39,7 +61,6 @@ if not st.session_state.masuk:
     c1,c2,c3 = st.columns(3)
     with c1: st.link_button("DONASI", "https://saweria.co/mamangbora", use_container_width=True)
     with c2:
-        # Kalau masih ngitung, tombol MASUK di-disable (gak bisa diklik). Kalau udah 0, baru aktif.
         if st.button("Masuk", use_container_width=True, disabled=(sisa > 0)):
             st.session_state.masuk = True; st.rerun()
     with c3: st.link_button("MEDSOS", "https://facebook.com/mamangbora", use_container_width=True)
