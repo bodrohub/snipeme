@@ -36,9 +36,11 @@ if not st.session_state.masuk:
     if sisa > 0: time.sleep(1); st.rerun()
     st.stop()
 
-# ========== STYLE UTAMA ==========
+# ========== SEMBUNYIIN MANAGE APP + TOOLBAR + FOOTER STREAMLIT ==========
 st.markdown("""
 <style>
+/* HAPUS Manage app, Share, hamburger, footer bawaan Streamlit */
+div[data-testid="stToolbar"], div[data-testid="stDecoration"], div[data-testid="stStatusWidget"], div[data-testid="stAppDeployButton"], footer, #MainMenu, header[data-testid="stHeader"]{display:none !important;visibility:hidden !important;}
 .stApp{background-color:#033333 !important;}
 section[data-testid="stSidebar"]{background-color:#022222 !important;}
 section[data-testid="stSidebar"] label, section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3, section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span, section[data-testid="stSidebar"] div{color:#ff6a00 !important;font-weight:bold !important;}
@@ -56,6 +58,8 @@ div[data-testid="stNumberInput"] button{background-color:#ff6a00 !important;colo
 .card-video p, .card-video a{color:white !important;} .card-video b{color:#ff6a00 !important;}
 .key-row{background-color:#022222 !important;padding:8px 12px !important;border-radius:8px !important;border:1px solid #ff6a00 !important;margin:6px 0 !important;}
 .key-row p{color:white !important;font-family:monospace !important;font-size:16px !important;}
+/* TOMBOL GEAR MELAYANG DI POJOK KIRI BAWAH - GEDE, GAK BISA KELEWAT */
+.gear-float{position:fixed;left:16px;bottom:16px;z-index:9999;background:#FF6A00;border:3px solid white;border-radius:50%;width:64px;height:64px;display:flex;justify-content:center;align-items:center;font-size:32px;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
 </style>
 """, unsafe_allow_html=True)
 
@@ -68,32 +72,46 @@ def mask_key(k):
     if len(k) <= 6: return k[:3] + "..." + k[-3:]
     return k[:3] + "." * (len(k)-6) + k[-3:]
 
-# ========== HEADER: JUDUL + DONASI/MEDSOS KONTRAS + PENGATURAN ==========
-h1,h2,h3,h4 = st.columns([3,1,1,1])
-with h1: st.markdown("""<div class="banner-snipe"><h1>🎯 SnipeMe</h1><p>Cari video viral dari 20 tahun kebelakang</p></div>""", unsafe_allow_html=True)
-with h2: st.link_button("❤️ DONASI", "https://saweria.co/mamangbora", use_container_width=True)
-with h3: st.link_button("🔵 MEDSOS", "https://facebook.com/mamangbora", use_container_width=True)
-with h4:
-    if st.button("⚙️ PENGATURAN", use_container_width=True):
+# ========== HEADER: GEAR GEDE + JUDUL + DONASI/MEDSOS KONTRAS ==========
+# Kolom 1 = GEAR DOANG, GEDE. Kolom 2 = Judul. Kolom 3-4 = Donasi/Medsos
+g1,g2,g3,g4 = st.columns([0.6,2.4,1,1])
+with g1:
+    # INI TOMBOL GEAR-NYA, GEDE, CUMA ICON DOANG
+    if st.button("⚙️", use_container_width=True, key="gear_atas"):
         st.session_state.show_settings = not st.session_state.show_settings
         st.rerun()
+with g2: st.markdown("""<div class="banner-snipe"><h1>🎯 SnipeMe</h1><p>Cari video viral dari 20 tahun kebelakang</p></div>""", unsafe_allow_html=True)
+with g3: st.link_button("❤️ DONASI", "https://saweria.co/mamangbora", use_container_width=True)
+with g4: st.link_button("🔵 MEDSOS", "https://facebook.com/mamangbora", use_container_width=True)
 
-# CSS khusus biar Donasi & Medsos KONTRAS - Donasi oren menyala, Medsos biru terang
 st.markdown("""
 <style>
-/* Tombol Donasi di header - kolom ke-2 */
-div[data-testid="stHorizontalBlock"] > div:nth-child(2) a{background-color:#FF6A00 !important;border:3px solid white !important;}
-div[data-testid="stHorizontalBlock"] > div:nth-child(2) a p{color:white !important;font-weight:900 !important;}
-/* Tombol Medsos di header - kolom ke-3 */
-div[data-testid="stHorizontalBlock"] > div:nth-child(3) a{background-color:#1877F2 !important;border:3px solid white !important;}
+/* GEAR ATAS - GEDE BANGET, OREN MENYALA */
+div[data-testid="stHorizontalBlock"] > div:nth-child(1) button{background-color:#FF6A00 !important;border:3px solid white !important;height:68px !important;border-radius:12px !important;}
+div[data-testid="stHorizontalBlock"] > div:nth-child(1) button p{font-size:32px !important;line-height:1 !important;}
+/* Donasi oren menyala */
+div[data-testid="stHorizontalBlock"] > div:nth-child(3) a{background-color:#FF6A00 !important;border:3px solid white !important;height:68px !important;}
 div[data-testid="stHorizontalBlock"] > div:nth-child(3) a p{color:white !important;font-weight:900 !important;}
-/* Tombol Pengaturan */
-div[data-testid="stHorizontalBlock"] > div:nth-child(4) button{background-color:#222222 !important;border:3px solid #ff6a00 !important;}
-div[data-testid="stHorizontalBlock"] > div:nth-child(4) button p{color:#ff6a00 !important;font-weight:900 !important;}
+/* Medsos biru terang */
+div[data-testid="stHorizontalBlock"] > div:nth-child(4) a{background-color:#1877F2 !important;border:3px solid white !important;height:68px !important;}
+div[data-testid="stHorizontalBlock"] > div:nth-child(4) a p{color:white !important;font-weight:900 !important;}
 </style>
 """, unsafe_allow_html=True)
 
-# ========== PENGATURAN - SEMUA YANG TADI DI KOTAK KUNING PINDAH KE SINI ==========
+# ========== TOMBOL GEAR MELAYANG KIRI BAWAH - CADANGAN BIAR GAK KELEWAT ==========
+# Ini tombol kedua, kalau yang di atas kelewat, yang bawah pasti keliatan
+if st.button("⚙️", key="gear_bawah"):
+    st.session_state.show_settings = not st.session_state.show_settings
+    st.rerun()
+st.markdown("""
+<style>
+/* Bikin tombol gear_bawah jadi melayang di kiri bawah */
+div[data-testid="stVerticalBlock"] > div:has(button[key="gear_bawah"]) {display:none;}
+</style>
+<div class="gear-float">⚙️</div>
+""", unsafe_allow_html=True)
+
+# ========== PENGATURAN ==========
 if st.session_state.show_settings:
     st.markdown("""
     <div class="box-api">
@@ -103,56 +121,38 @@ if st.session_state.show_settings:
     </div>
     """, unsafe_allow_html=True)
     st.link_button("🌐 Buka Google Cloud Console - Bikin API Key", "https://console.cloud.google.com/apis/library/youtube.googleapis.com")
-
-    # List API Key yang udah kesimpan - tampil masking 3 awal + titik + 3 akhir
     if st.session_state.api_keys:
         st.markdown(f'<div class="box-putih"><p>✅ {len(st.session_state.api_keys)} API Key tersimpan - Rotasi otomatis aktif. Centang yang mau dihapus, baru klik Hapus.</p></div>', unsafe_allow_html=True)
         for idx, k in enumerate(st.session_state.api_keys):
             c_cek, c_key = st.columns([1,5])
-            with c_cek:
-                st.session_state.pilih_hapus[idx] = st.checkbox("", value=st.session_state.pilih_hapus.get(idx, False), key=f"cek_{idx}")
-            with c_key:
-                st.markdown(f'<div class="key-row"><p>Key {idx+1} : {mask_key(k)}</p></div>', unsafe_allow_html=True)
+            with c_cek: st.session_state.pilih_hapus[idx] = st.checkbox("", value=st.session_state.pilih_hapus.get(idx, False), key=f"cek_{idx}")
+            with c_key: st.markdown(f'<div class="key-row"><p>Key {idx+1} : {mask_key(k)}</p></div>', unsafe_allow_html=True)
     else:
         st.markdown('<div class="box-putih"><p>⚠️ Belum ada API Key. Klik Tambah untuk nambah.</p></div>', unsafe_allow_html=True)
-
-    # Tombol Tambah | Simpan | Hapus
     b1,b2,b3 = st.columns(3)
     with b1:
         if st.button("➕ TAMBAH", use_container_width=True):
             st.session_state.show_add = True; st.rerun()
     with b2:
         if st.button("💾 SIMPAN", use_container_width=True):
-            # Simpan cuma jalan kalau lagi mode Tambah & ada isinya
             if st.session_state.show_add and st.session_state.get("input_key_baru", "").strip():
                 st.session_state.api_keys.append(st.session_state.input_key_baru.strip())
-                st.session_state.show_add = False
-                st.session_state.input_key_baru = ""
-                st.success("✅ API Key tersimpan!")
-                st.rerun()
-            elif not st.session_state.show_add:
-                st.warning("Klik TAMBAH dulu coy, baru isi key-nya!")
-            else:
-                st.warning("Isi dulu API Key-nya, jangan kosong!")
+                st.session_state.show_add = False; st.session_state.input_key_baru = ""; st.success("✅ API Key tersimpan!"); st.rerun()
+            elif not st.session_state.show_add: st.warning("Klik TAMBAH dulu coy, baru isi key-nya!")
+            else: st.warning("Isi dulu API Key-nya, jangan kosong!")
     with b3:
         if st.button("🗑️ HAPUS", use_container_width=True):
             dipilih = [i for i, v in st.session_state.pilih_hapus.items() if v]
-            if not dipilih:
-                st.warning("⚠️ Pilih dulu mana yang mau dihapus! Centang dulu kotak di samping Key-nya. Gak ada yang kehapus.")
+            if not dipilih: st.warning("⚠️ Pilih dulu mana yang mau dihapus! Centang dulu kotak di samping Key-nya. Gak ada yang kehapus.")
             else:
                 st.session_state.api_keys = [k for i, k in enumerate(st.session_state.api_keys) if i not in dipilih]
-                st.session_state.pilih_hapus = {}
-                st.success(f"✅ {len(dipilih)} Key berhasil dihapus!")
-                st.rerun()
-
-    # Input Tambah - HANYA MUNCUL KALAU KLIK TAMBAH
+                st.session_state.pilih_hapus = {}; st.success(f"✅ {len(dipilih)} Key berhasil dihapus!"); st.rerun()
     if st.session_state.show_add:
         st.markdown('<div class="box-putih"><p>📝 Tempel 1 API Key baru di bawah, lalu klik SIMPAN:</p></div>', unsafe_allow_html=True)
         st.text_input("API Key baru", key="input_key_baru", placeholder="Tempel AIza... di sini", label_visibility="collapsed")
         if st.button("❌ BATAL"):
             st.session_state.show_add = False; st.rerun()
 
-# ========== FUNGSI CARI ROTASI ==========
 def youtube_search_rotasi(keyword, published_after, api_keys):
     last_error = None
     for i, key in enumerate(api_keys):
@@ -190,8 +190,7 @@ with st.sidebar:
     cari = st.button("🔍 CARI")
 
 if cari:
-    if not st.session_state.api_keys:
-        st.error("API Key belum ada! Klik ⚙️ PENGATURAN di atas > TAMBAH > isi Key > SIMPAN.")
+    if not st.session_state.api_keys: st.error("API Key belum ada! Klik ⚙️ GEAR di atas > TAMBAH > isi Key > SIMPAN.")
     else:
         published_after = (datetime.utcnow() - timedelta(days=total_hari)).isoformat("T") + "Z" if total_hari > 0 else None
         stats, idx_key, err = youtube_search_rotasi(keyword, published_after, st.session_state.api_keys)
