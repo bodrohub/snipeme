@@ -4,21 +4,21 @@ st.set_page_config(page_title="SnipeMe", page_icon="🎯", layout="wide")
 
 st.markdown("""
 <style>
-.stApp { background-color: #1f352d !important; }
-section[data-testid="stSidebar"] { background-color: #16281f !important; }
+.stApp { background-color: #033333 !important; }
+section[data-testid="stSidebar"] { background-color: #022222 !important; }
 section[data-testid="stSidebar"] label, section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3, section[data-testid="stSidebar"] p { color: white !important; }
 h1, h2, h3, p, span { color: white !important; }
 div[data-testid="stTextInput"] input, div[data-testid="stNumberInput"] input {
-    border: 3px solid #ff6a00 !important; background-color: #2a4a3e !important; color: white !important;
+    border: 3px solid #ff6a00 !important; background-color: #044444 !important; color: white !important;
 }
 div[data-testid="stNumberInput"] button { background-color: #ff6a00 !important; color: white !important; }
 a[data-testid="stLinkButton"] { background-color: #ff3b30 !important; color: white !important; border: 2px solid #ff6a00 !important; }
 a[data-testid="stLinkButton"] p { color: white !important; font-weight: bold !important; }
 button[data-testid="stBaseButton-secondary"] { background-color: #ff3b30 !important; color: white !important; border: 2px solid #ff6a00 !important; }
 button[data-testid="stBaseButton-secondary"] p { color: white !important; font-weight: bold !important; }
-/* Banner SnipeMe - Tosca Muda + Teks Oren */
+/* Banner SnipeMe - #004D4D */
 .banner-snipe {
-    background-color: #8FE3D0 !important;
+    background-color: #004D4D !important;
     padding: 18px 20px !important;
     border-radius: 12px !important;
     margin-top: -10px !important;
@@ -30,7 +30,6 @@ button[data-testid="stBaseButton-secondary"] p { color: white !important; font-w
 </style>
 """, unsafe_allow_html=True)
 
-# BANNER TOSCA MUDA
 c1,c2,c3 = st.columns([3,1,1])
 with c1:
     st.markdown("""
@@ -53,7 +52,6 @@ with st.sidebar:
 
     st.markdown("### ⏰ Waktu Upload")
     st.caption("Isi salah satu aja, sisanya biarin 0. Contoh: mau video 20 tahun terakhir, isi Tahun = 20")
-    # 4 kolom isian manual
     col_h, col_m = st.columns(2)
     with col_h:
         hari = st.number_input("Hari Terakhir", min_value=0, max_value=3650, value=0)
@@ -65,7 +63,6 @@ with st.sidebar:
     with col_t:
         tahun = st.number_input("Tahun Terakhir", min_value=0, max_value=20, value=0)
 
-    # Hitung total hari buat info
     total_hari = hari + (minggu*7) + (bulan*30) + (tahun*365)
     if total_hari > 0:
         st.success(f"Nyari video dari {total_hari} hari terakhir")
@@ -79,5 +76,3 @@ if cari:
     st.success(f"Nyari: {keyword} | Views {views_min}-{views_max} | VPH > {vph_min} | Durasi {durasi_min}-{durasi_max} menit | Waktu: {waktu_text} | Hari:{hari} Minggu:{minggu} Bulan:{bulan} Tahun:{tahun}")
     txt = f"SnipeMe - {keyword}\nViews: {views_min}-{views_max} | VPH > {vph_min}\nWaktu Upload: {waktu_text}\nHari:{hari} Minggu:{minggu} Bulan:{bulan} Tahun:{tahun}\n"
     st.download_button("⬇️ Export txt/md", txt, file_name="snipeme.txt")
-else:
-    st.info("Isi filter di kiri, terus klik CARI 👈")
