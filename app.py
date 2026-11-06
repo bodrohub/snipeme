@@ -58,9 +58,7 @@ div[data-testid="stNumberInput"] button{background-color:#ff6a00 !important;colo
 .card-video p, .card-video a{color:white !important;} .card-video b{color:#ff6a00 !important;}
 .key-row{background-color:#022222 !important;padding:8px 12px !important;border-radius:8px !important;border:1px solid #ff6a00 !important;margin:6px 0 !important;}
 .key-row p{color:white !important;font-family:monospace !important;font-size:16px !important;}
-.hasil-scroll{max-height:650px !important;overflow-y:auto !important;overflow-x:hidden !important;padding-right:10px !important;border:2px solid #ff6a00 !important;border-radius:12px !important;padding:12px !important;background:#022222 !important;}
-.hasil-scroll::-webkit-scrollbar{width:12px;} .hasil-scroll::-webkit-scrollbar-thumb{background:#ff6a00;border-radius:6px;} .hasil-scroll::-webkit-scrollbar-track{background:#044444;}
-.sort-aktif{background-color:#FF6A00 !important;}
+.hasil-scroll{max-height:650px !important;overflow-y:auto !important;overflow-x:hidden !important;padding:12px !important;background:#022222 !important;border:2px solid #ff6a00 !important;border-radius:12px !important;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -71,6 +69,8 @@ if "pilih_hapus" not in st.session_state: st.session_state.pilih_hapus = {}
 if "sort_mode" not in st.session_state: st.session_state.sort_mode = "Terbaru"
 if "hasil" not in st.session_state: st.session_state.hasil = []
 if "hasil_info" not in st.session_state: st.session_state.hasil_info = ""
+if "trigger_search" not in st.session_state: st.session_state.trigger_search = False
+if "last_params" not in st.session_state: st.session_state.last_params = {}
 
 def mask_key(k):
     if len(k) <= 6: return k[:3] + "..." + k[-3:]
@@ -80,28 +80,39 @@ def parse_tanggal(s):
     try: return datetime.fromisoformat(s.replace("Z","+00:00")).replace(tzinfo=None)
     except: return None
 
-# ========== SIDEBAR - SELALU TERLIHAT, GEAR DI KIRI BAWAH ==========
+def klik_cari():
+    # Dipanggil pas tombol CARI diklik - simpen params + tandain mau cari
+    st.session_state.trigger_search = True
+    st.session_state.last_params = {
+        "keyword": st.session_state.get("kw", "vlog"),
+        "views_min": st.session_state.get("vmin", 1000000),
+        "views_max": st.session_state.get("vmax", 50000000),
+        "total_hari": st.session_state.get("total_hari_val", 0),
+    }
+
+# ========== SIDEBAR ==========
 with st.sidebar:
     st.header("Filter Pencarian")
-    keyword = st.text_input("Keyword", "vlog")
-    views_min = st.number_input("Views Minimal", value=1000000)
-    views_max = st.number_input("Views Maksimal", value=50000000)
-    vph_min = st.number_input("VPH Minimal", value=10000)
-    durasi_min = st.text_input("Durasi Min (menit)", "0")
+    keyword = st.text_input("Keyword", "motocross", key="kw")
+    views_min = st.number_input("Views Minimal", value=1000000, key="vmin")
+    views_max = st.number_input("Views Maksimal", value=50000000, key="vmax")
+    vph_min = st.number_input("VPH Minimal", value=10000, key="vph")
+    durasi_min = st.text_input("Durasi Min (menit)", "10")
     durasi_max = st.text_input("Durasi Max (menit)", "60")
     st.markdown("### ⏰ Waktu Upload")
     col_h, col_m = st.columns(2)
-    with col_h: hari = st.number_input("Hari Terakhir", min_value=0, max_value=3650, value=0)
-    with col_m: minggu = st.number_input("Minggu Terakhir", min_value=0, max_value=1040, value=0)
+    with col_h: hari = st.number_input("Hari Terakhir", min_value=0, max_value=3650, value=0, key="hari")
+    with col_m: minggu = st.number_input("Minggu Terakhir", min_value=0, max_value=1040, value=0, key="minggu")
     col_b, col_t = st.columns(2)
-    with col_b: bulan = st.number_input("Bulan Terakhir", min_value=0, max_value=240, value=0)
-    with col_t: tahun = st.number_input("Tahun Terakhir", min_value=0, max_value=20, value=0)
+    with col_b: bulan = st.number_input("Bulan Terakhir", min_value=0, max_value=240, value=0, key="bulan")
+    with col_t: tahun = st.number_input("Tahun Terakhir", min_value=0, max_value=20, value=10, key="tahun")
     total_hari = hari + (minggu*7) + (bulan*30) + (tahun*365)
+    st.session_state.total_hari_val = total_hari
     if total_hari > 0: st.markdown(f'<div class="box-putih"><p>Waktu Upload: {total_hari} hari terakhir</p></div>', unsafe_allow_html=True)
     else: st.markdown('<div class="box-putih"><p>Waktu Upload: Semua (dari 20 tahun kebelakang)</p></div>', unsafe_allow_html=True)
-    cari = st.button("🔍 CARI", use_container_width=True)
+    # TOMBOL CARI PAKE CALLBACK - BIAR GAK KEHAPUS PAS RERUN
+    st.button("🔍 CARI", use_container_width=True, on_click=klik_cari)
     st.markdown("<br>", unsafe_allow_html=True)
-    # GEAR DI SIDEBAR KIRI BAWAH - KLIK = MUNCULIN PENGATURAN
     if st.button("⚙️", key="gear_sidebar"):
         st.session_state.show_settings = True
         st.session_state.show_add = False
@@ -114,23 +125,16 @@ section[data-testid="stSidebar"] button[key="gear_sidebar"] p{font-size:28px !im
 </style>
 """, unsafe_allow_html=True)
 
-# ========== SPACE UTAMA ==========
-# 1. KALAU GEAR DIKLIK -> TAMPILIN PENGATURAN SAMPAI KLIK SIMPAN
+# ========== PENGATURAN - MUNCUL GEAR SAMPAI SIMPAN ==========
 if st.session_state.show_settings:
     h1,h2,h3 = st.columns([2,1,1])
     with h1: st.markdown("""<div class="banner-snipe"><h1>🎯 SnipeMe</h1><p>Cari video viral dari 20 tahun kebelakang</p></div>""", unsafe_allow_html=True)
     with h2: st.link_button("❤️ DONASI", "https://saweria.co/mamangbora", use_container_width=True)
     with h3: st.link_button("🔵 MEDSOS", "https://facebook.com/mamangbora", use_container_width=True)
-    st.markdown("""
-    <div class="box-api">
-    <p><b>⚙️ PENGATURAN - YouTube API Key</b></p>
-    <p>Kalau Key 1 habis kuotanya, otomatis pindah ke Key 2, 3, dst. 1 Key = 10.000 kuota / hari.</p>
-    <p>Belum punya? Klik 👉 <a href="https://console.cloud.google.com/" target="_blank">🌐 Buka Google Cloud Console</a> - Bikin Project > Library > Aktifkan YouTube Data API v3 > Credentials > Create API Key</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""<div class="box-api"><p><b>⚙️ PENGATURAN - YouTube API Key</b></p><p>Kalau Key 1 habis, otomatis pindah ke Key 2, 3, dst.</p><p>Belum punya? Klik 👉 <a href="https://console.cloud.google.com/" target="_blank">🌐 Buka Google Cloud Console</a></p></div>""", unsafe_allow_html=True)
     st.link_button("🌐 Buka Google Cloud Console - Bikin API Key", "https://console.cloud.google.com/apis/library/youtube.googleapis.com")
     if st.session_state.api_keys:
-        st.markdown(f'<div class="box-putih"><p>✅ {len(st.session_state.api_keys)} API Key tersimpan - Rotasi otomatis aktif. Centang yang mau dihapus, baru klik Hapus.</p></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="box-putih"><p>✅ {len(st.session_state.api_keys)} API Key tersimpan - Centang yang mau dihapus, baru klik Hapus.</p></div>', unsafe_allow_html=True)
         for idx, k in enumerate(st.session_state.api_keys):
             c_cek, c_key = st.columns([1,5])
             with c_cek: st.session_state.pilih_hapus[idx] = st.checkbox("", value=st.session_state.pilih_hapus.get(idx, False), key=f"cek_{idx}")
@@ -142,21 +146,19 @@ if st.session_state.show_settings:
         if st.button("➕ TAMBAH", use_container_width=True):
             st.session_state.show_add = True; st.rerun()
     with b2:
-        # SIMPAN = SIMPAN KEY (KALAU ADA) + SEMBUNYIIN PENGATURAN
         if st.button("💾 SIMPAN", use_container_width=True):
             if st.session_state.show_add and st.session_state.get("input_key_baru", "").strip():
                 st.session_state.api_keys.append(st.session_state.input_key_baru.strip())
                 st.success("✅ API Key tersimpan!")
-            # APAPUN YANG TERJADI, SETELAH SIMPAN -> PENGATURAN HILANG
             st.session_state.show_settings = False
             st.session_state.show_add = False
             st.session_state.input_key_baru = ""
             st.session_state.pilih_hapus = {}
-            time.sleep(0.5); st.rerun()
+            time.sleep(0.3); st.rerun()
     with b3:
         if st.button("🗑️ HAPUS", use_container_width=True):
             dipilih = [i for i, v in st.session_state.pilih_hapus.items() if v]
-            if not dipilih: st.warning("⚠️ Pilih dulu mana yang mau dihapus! Centang dulu kotak di samping Key-nya. Gak ada yang kehapus.")
+            if not dipilih: st.warning("⚠️ Pilih dulu mana yang mau dihapus! Centang dulu kotak di samping Key-nya.")
             else:
                 st.session_state.api_keys = [k for i, k in enumerate(st.session_state.api_keys) if i not in dipilih]
                 st.session_state.pilih_hapus = {}; st.success(f"✅ {len(dipilih)} Key berhasil dihapus!"); st.rerun()
@@ -167,7 +169,7 @@ if st.session_state.show_settings:
             st.session_state.show_add = False; st.rerun()
     st.stop()
 
-# 2. KALAU GAK LAGI DI PENGATURAN -> TAMPILIN TOMBOL SORTING DI SPACE UTAMA + HASIL
+# ========== SPACE UTAMA - SORTING ==========
 st.markdown("### 🔽 Urutkan Hasil:")
 s1,s2,s3,s4,s5,s6 = st.columns(6)
 with s1:
@@ -184,75 +186,68 @@ with s6:
     if st.button("👥 Subscriber Terbanyak", use_container_width=True): st.session_state.sort_mode = "Subscriber Terbanyak"; st.rerun()
 st.markdown(f'<div class="box-putih"><p>Mode urut aktif: <b>{st.session_state.sort_mode}</b> | Klik CARI di sidebar kiri untuk cari ulang.</p></div>', unsafe_allow_html=True)
 
-# Fungsi cari 100 hasil - pake pagination 50+50
-def youtube_search_100(keyword, published_after, published_before, api_keys):
-    for i, key in enumerate(api_keys):
-        semua = []
-        page_token = ""
-        for _ in range(2): # 2 x 50 = 100
-            params = {"part": "snippet", "q": keyword, "type": "video", "maxResults": 50, "key": key, "order": "date"}
-            if published_after: params["publishedAfter"] = published_after
-            if published_before: params["publishedBefore"] = published_before
-            if page_token: params["pageToken"] = page_token
-            r = requests.get("https://www.googleapis.com/youtube/v3/search", params=params).json()
-            if "items" not in r:
-                err = r.get("error", {}).get("errors", [{}])[0].get("reason", "")
-                if err in ["quotaExceeded", "dailyLimitExceeded"]: break
-                return None, i, r
-            semua.extend(r["items"])
-            page_token = r.get("nextPageToken", "")
-            if not page_token: break
-        if semua:
-            # Ambil detail 100 video sekaligus (bagi 50-50 karena limit API)
-            hasil_detail = []
-            for chunk_start in range(0, len(semua), 50):
-                chunk = semua[chunk_start:chunk_start+50]
-                ids = ",".join([x["id"]["videoId"] for x in chunk])
-                stats = requests.get("https://www.googleapis.com/youtube/v3/videos", params={"part": "statistics,contentDetails,snippet", "id": ids, "key": key}).json()
-                hasil_detail.extend(stats.get("items", []))
-                # Ambil subscriber channel-nya
-                ch_ids = ",".join(list(set([x["snippet"]["channelId"] for x in hasil_detail[-50:]])))
-                ch = requests.get("https://www.googleapis.com/youtube/v3/channels", params={"part": "statistics", "id": ch_ids, "key": key}).json()
-                ch_map = {c["id"]: int(c["statistics"].get("subscriberCount", 0)) for c in ch.get("items", [])}
-                for v in hasil_detail[-50:]: v["subs"] = ch_map.get(v["snippet"]["channelId"], 0)
-            return hasil_detail, i, None
-    return None, -1, {"error": "semua key habis"}
-
-if cari:
+# ========== LOGIKA CARI - JALAN KALAU TRIGGER_SEARCH TRUE ==========
+if st.session_state.trigger_search:
+    st.session_state.trigger_search = False
+    p = st.session_state.last_params
+    kw = p.get("keyword", "motocross")
+    vmin = p.get("views_min", 1000000)
+    vmax = p.get("views_max", 50000000)
+    th = p.get("total_hari", 0)
     if not st.session_state.api_keys:
         st.error("API Key belum ada! Klik ⚙️ GEAR di sidebar kiri bawah > TAMBAH > isi Key > SIMPAN.")
     else:
         now = datetime.utcnow()
-        if total_hari > 0:
-            published_after = (now - timedelta(days=total_hari)).isoformat("T") + "Z"
+        if th > 0:
+            published_after = (now - timedelta(days=th)).isoformat("T") + "Z"
             published_before = now.isoformat("T") + "Z"
-            batas_bawah = now - timedelta(days=total_hari)
+            batas_bawah = now - timedelta(days=th)
         else:
             published_after = None; published_before = None; batas_bawah = None
-        hasil_detail, idx_key, err = youtube_search_100(keyword, published_after, published_before, st.session_state.api_keys)
-        if hasil_detail is None:
-            if idx_key == -1: st.error(f"❌ SEMUA {len(st.session_state.api_keys)} API KEY HABIS KUOTANYA! {err}")
-            else: st.error(f"API Error: {err}")
-        else:
-            # FILTER AKURAT DI SINI - BUANG VIDEO YANG TANGGALNYA DI LUAR PILIHAN USER
-            filtered = []
-            for v in hasil_detail:
-                tgl = parse_tanggal(v["snippet"]["publishedAt"])
-                if batas_bawah and tgl and tgl < batas_bawah: continue
-                views = int(v["statistics"].get("viewCount", 0))
-                if not (views_min <= views <= views_max): continue
-                filtered.append(v)
-            st.session_state.hasil = filtered
-            if idx_key > 0: st.session_state.hasil_info = f"⚠️ Key 1-{idx_key} habis, pakai Key {idx_key+1} | Filter tanggal: {batas_bawah.date() if batas_bawah else 'Semua'} s/d {now.date()} | Total lolos filter: {len(filtered)} dari {len(hasil_detail)}"
-            else: st.session_state.hasil_info = f"✅ Pakai API Key ke-{idx_key+1} | Filter tanggal: {batas_bawah.date() if batas_bawah else 'Semua'} s/d {now.date()} | Total lolos filter: {len(filtered)} dari {len(hasil_detail)}"
-            st.rerun()
+        with st.spinner("🔍 Lagi cari ke YouTube... tunggu bentar..."):
+            hasil_detail = None; idx_key = 0; err_msg = ""
+            for i, key in enumerate(st.session_state.api_keys):
+                params = {"part": "snippet", "q": kw, "type": "video", "maxResults": 50, "key": key, "order": "date"}
+                if published_after: params["publishedAfter"] = published_after
+                if published_before: params["publishedBefore"] = published_before
+                try: r = requests.get("https://www.googleapis.com/youtube/v3/search", params=params, timeout=20).json()
+                except Exception as e: err_msg = str(e); continue
+                if "items" not in r:
+                    err = r.get("error", {}).get("errors", [{}])[0].get("reason", "")
+                    err_msg = str(r.get("error", {}).get("message", r))
+                    if err in ["quotaExceeded", "dailyLimitExceeded"]: continue
+                    else: break
+                ids = ",".join([x["id"]["videoId"] for x in r["items"]])
+                if not ids: hasil_detail = []; idx_key = i; break
+                stats = requests.get("https://www.googleapis.com/youtube/v3/videos", params={"part": "statistics,contentDetails,snippet", "id": ids, "key": key}, timeout=20).json()
+                hasil_detail = stats.get("items", []); idx_key = i
+                # Subscriber
+                try:
+                    ch_ids = ",".join(list(set([x["snippet"]["channelId"] for x in hasil_detail])))
+                    ch = requests.get("https://www.googleapis.com/youtube/v3/channels", params={"part": "statistics", "id": ch_ids, "key": key}, timeout=20).json()
+                    ch_map = {c["id"]: int(c["statistics"].get("subscriberCount", 0)) for c in ch.get("items", [])}
+                    for v in hasil_detail: v["subs"] = ch_map.get(v["snippet"]["channelId"], 0)
+                except: pass
+                break
+            if hasil_detail is None:
+                st.error(f"❌ Gagal cari! API Error: {err_msg} | Cek API Key lu, pastikan YouTube Data API v3 udah aktif!")
+            else:
+                filtered = []
+                for v in hasil_detail:
+                    tgl = parse_tanggal(v["snippet"]["publishedAt"])
+                    if batas_bawah and tgl and tgl < batas_bawah: continue
+                    views = int(v["statistics"].get("viewCount", 0))
+                    if not (vmin <= views <= vmax): continue
+                    filtered.append(v)
+                st.session_state.hasil = filtered
+                st.session_state.hasil_info = f"✅ Pakai API Key ke-{idx_key+1} | Filter: {batas_bawah.date() if batas_bawah else 'Semua'} s/d {now.date()} | Lolos filter: {len(filtered)} dari {len(hasil_detail)} | Keyword: {kw}"
+                st.rerun()
 
-# TAMPILIN HASIL - SORTING + 100 HASIL + SCROLLBAR
+# ========== TAMPILIN HASIL ==========
 if st.session_state.hasil:
     st.markdown(f'<div class="box-putih"><p>{st.session_state.hasil_info}</p></div>', unsafe_allow_html=True)
     hasil = list(st.session_state.hasil)
     now = datetime.utcnow()
-    # Hitung VPH = Views / jam sejak upload
     for v in hasil:
         tgl = parse_tanggal(v["snippet"]["publishedAt"])
         jam = max(1, (now - tgl).total_seconds() / 3600) if tgl else 1
@@ -264,15 +259,13 @@ if st.session_state.hasil:
     elif mode == "Views Paling Sedikit": hasil.sort(key=lambda x: int(x["statistics"].get("viewCount", 0)))
     elif mode == "VPH Tertinggi": hasil.sort(key=lambda x: x.get("vph", 0), reverse=True)
     elif mode == "Subscriber Terbanyak": hasil.sort(key=lambda x: x.get("subs", 0), reverse=True)
-
-    st.markdown(f"### Ditemukan: {len(hasil)} video (max 100) - Mode: {mode}")
+    st.markdown(f"### Ditemukan: {len(hasil)} video - Mode: {mode}")
     st.markdown('<div class="hasil-scroll">', unsafe_allow_html=True)
     for v in hasil[:100]:
         sn = v["snippet"]; views = int(v["statistics"].get("viewCount", 0))
         st.markdown(f'<div class="card-video"><p><b>{sn["title"]}</b></p><p>Channel: {sn["channelTitle"]} | Subs: {v.get("subs",0):,} | Views: {views:,} | VPH: {int(v.get("vph",0)):,} | Upload: {sn["publishedAt"][:10]}</p><p><a href="https://youtube.com/watch?v={v["id"]}" target="_blank">▶️ Tonton di YouTube</a></p></div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     txt = "\n".join([f"{x['snippet']['title']} - https://youtube.com/watch?v={x['id']}" for x in hasil[:100]])
-    st.download_button("⬇️ Export txt/md (100 hasil)", txt, file_name="snipeme.txt")
+    st.download_button("⬇️ Export txt/md", txt, file_name="snipeme.txt")
 else:
-    if not st.session_state.show_settings:
-        st.markdown('<div class="box-putih"><p>👈 Atur filter di sidebar kiri, lalu klik 🔍 CARI. Hasil 100 video akan muncul di sini dengan scrollbar atas-bawah.</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="box-putih"><p>👈 Atur filter di sidebar kiri, lalu klik 🔍 CARI. Hasil akan muncul di sini dengan scrollbar atas-bawah.</p></div>', unsafe_allow_html=True)
