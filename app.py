@@ -3,31 +3,45 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="SnipeMe", page_icon="🎯", layout="wide")
 
-# ========== POPUP DONASI 80% TENGAH - 5 DETIK + 1 DETIK ==========
+# ========== POPUP DONASI - VERSI BENER, TOMBOL KELIATAN ==========
 if "masuk" not in st.session_state: st.session_state.masuk = False
 if "popup_start" not in st.session_state: st.session_state.popup_start = time.time()
+
 if not st.session_state.masuk:
     sisa = 6 - int(time.time() - st.session_state.popup_start)
     if sisa > 0:
+        # FASE 1: LAGI NGITUNG - BOLEH FULL LAYAR, KARENA BELUM ADA TOMBOL
         st.markdown(f"""
         <style>.stApp{{background-color:#033333 !important;}}
-        .popup-bg{{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;justify-content:center;align-items:center;}}
-        .popup-box{{width:80vw;height:80vh;max-width:80vw;max-height:80vh;background:#004D4D;border:4px solid #ff6a00;border-radius:16px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;}}
+        .popup-bg{{position:fixed;inset:0;background:#033333;z-index:9999;display:flex;justify-content:center;align-items:center;}}
+        .popup-box{{width:80vw;height:80vh;background:#004D4D;border:4px solid #ff6a00;border-radius:16px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;}}
         .popup-box h1{{color:#ff6a00 !important;font-size:48px;margin:0;}} .popup-box p{{color:white !important;font-size:22px;font-weight:bold;}}
-        </style><div class="popup-bg"><div class="popup-box"><h1>🎯 SnipeMe</h1><p>Dukung biar tetap gratis! 🙏</p><p>Donasi dulu coy, app kebuka dalam {sisa} detik...</p><p>Tombol MASUK aktif setelah 6 detik, gak bisa di-skip!</p></div></div>""", unsafe_allow_html=True)
-        st.markdown(f"### ⏳ Tunggu {sisa} detik..."); time.sleep(1); st.rerun()
+        </style>
+        <div class="popup-bg"><div class="popup-box"><h1>🎯 SnipeMe</h1><p>Dukung biar tetap gratis! 🙏</p><p>Donasi dulu coy, app kebuka dalam {sisa} detik...</p><p>Tombol MASUK aktif setelah 6 detik, gak bisa di-skip!</p></div></div>
+        """, unsafe_allow_html=True)
+        st.markdown(f"### ⏳ Tunggu {sisa} detik...")
+        time.sleep(1); st.rerun()
     else:
+        # FASE 2: UDAH HABIS - JANGAN PAKE FIXED LAGI! BIAR TOMBOL BISA DIKLIK
         st.markdown("""
-        <style>.stApp{background-color:#033333 !important;}
-        .popup-bg{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;justify-content:center;align-items:center;}
-        .popup-box{width:80vw;height:80vh;max-width:80vw;max-height:80vh;background:#004D4D;border:4px solid #ff6a00;border-radius:16px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;}
-        .popup-box h1{color:#ff6a00 !important;font-size:48px;margin:0;} .popup-box p{color:white !important;font-size:22px;font-weight:bold;}
-        </style><div class="popup-bg"><div class="popup-box"><h1>🎯 SnipeMe</h1><p>Terima kasih udah nunggu! Silakan masuk 👇</p></div></div>""", unsafe_allow_html=True)
+        <style>
+        .stApp{background-color:#033333 !important;}
+        .popup-box2{width:80%;margin:40px auto 20px auto;background:#004D4D;border:4px solid #ff6a00;border-radius:16px;padding:40px 20px;text-align:center;}
+        .popup-box2 h1{color:#ff6a00 !important;font-size:48px;margin:0;} .popup-box2 p{color:white !important;font-size:22px;font-weight:bold;}
+        div[data-testid="stLinkButton"] > a {background-color:#ff3b30 !important;border:2px solid #ff6a00 !important;height:55px !important;}
+        div[data-testid="stLinkButton"] p{color:white !important;font-size:18px !important;font-weight:bold !important;}
+        button[data-testid="stBaseButton-secondary"]{background-color:#00c853 !important;border:2px solid #ff6a00 !important;height:55px !important;}
+        button[data-testid="stBaseButton-secondary"] p{color:white !important;font-size:18px !important;font-weight:bold !important;}
+        </style>
+        <div class="popup-box2"><h1>🎯 SnipeMe</h1><p>Terima kasih udah nunggu! Silakan masuk 👇</p><p>Donasi dulu biar makin semangat bikinnya 🙏</p></div>
+        """, unsafe_allow_html=True)
+        # TOMBOLNYA DI LUAR POPUP, JADI PASTI KELIATAN & BISA DIKLIK
         c1,c2,c3 = st.columns(3)
-        with c1: st.link_button("❤️ Donasi", "https://saweria.co/mamangbora", use_container_width=True)
+        with c1: st.link_button("❤️ DONASI", "https://saweria.co/mamangbora", use_container_width=True)
         with c2:
-            if st.button("✅ MASUK", use_container_width=True): st.session_state.masuk = True; st.rerun()
-        with c3: st.link_button("🔗 Medsos", "https://facebook.com/mamangbora", use_container_width=True)
+            if st.button("✅ MASUK", use_container_width=True):
+                st.session_state.masuk = True; st.rerun()
+        with c3: st.link_button("🔗 MEDSOS", "https://facebook.com/mamangbora", use_container_width=True)
         st.stop()
 
 # ========== APP UTAMA ==========
@@ -62,33 +76,28 @@ with c3: st.link_button("🔗 Medsos", "https://facebook.com/mamangbora")
 
 # ========== MULTI API KEY - ROTASI OTOMATIS ==========
 if "api_keys" not in st.session_state: st.session_state.api_keys = []
-
 st.markdown("""
 <div class="box-api">
 <p><b>🔑 YouTube API Key (BISA LEBIH DARI 1)</b> - Kalau Key 1 habis kuotanya, otomatis pindah ke Key 2, 3, dst.</p>
 <p>Belum punya? Klik 👉 <a href="https://console.cloud.google.com/" target="_blank">🌐 Buka Google Cloud Console</a> - Bikin Project > Library > Aktifkan YouTube Data API v3 > Credentials > Create API Key</p>
-<p>Cara isi: 1 baris 1 API Key. Contoh:<br>AIza...Key1<br>AIza...Key2<br>AIza...Key3</p>
+<p>Cara isi: 1 baris 1 API Key.</p>
 </div>
 """, unsafe_allow_html=True)
-
-api_text = st.text_area("Tempel API Key di sini (1 baris 1 key)", value="\n".join(st.session_state.api_keys), type="password", placeholder="AIza...Key1\nAIza...Key2\nAIza...Key3", height=100)
+api_text = st.text_area("Tempel API Key di sini (1 baris 1 key)", value="\n".join(st.session_state.api_keys), type="password", placeholder="AIza...Key1\nAIza...Key2", height=100)
 col_simpan, col_hapus = st.columns([1,1])
 with col_simpan:
     if st.button("💾 SIMPAN SEMUA API KEY"):
-        keys = [k.strip() for k in api_text.splitlines() if k.strip()]
-        st.session_state.api_keys = keys
-        st.success(f"✅ {len(keys)} API Key tersimpan & disembunyikan!")
+        st.session_state.api_keys = [k.strip() for k in api_text.splitlines() if k.strip()]
+        st.success(f"✅ {len(st.session_state.api_keys)} API Key tersimpan & disembunyikan!")
 with col_hapus:
     if st.button("🗑️ HAPUS SEMUA KEY"):
         st.session_state.api_keys = []; st.rerun()
-
 if st.session_state.api_keys:
-    st.markdown(f'<div class="box-putih"><p>✅ {len(st.session_state.api_keys)} API Key tersimpan & disembunyikan (****) - Siap nyari! Rotasi otomatis aktif.</p></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="box-putih"><p>✅ {len(st.session_state.api_keys)} API Key tersimpan & disembunyikan (****) - Rotasi otomatis aktif.</p></div>', unsafe_allow_html=True)
 else:
     st.markdown('<div class="box-putih"><p>⚠️ API Key belum diisi - Klik link Google Cloud Console di atas!</p></div>', unsafe_allow_html=True)
     st.link_button("🌐 Buka Google Cloud Console - Bikin API Key", "https://console.cloud.google.com/apis/library/youtube.googleapis.com")
 
-# Fungsi cari pake rotasi key
 def youtube_search_rotasi(keyword, published_after, api_keys):
     last_error = None
     for i, key in enumerate(api_keys):
@@ -96,16 +105,13 @@ def youtube_search_rotasi(keyword, published_after, api_keys):
         if published_after: params["publishedAfter"] = published_after
         r = requests.get("https://www.googleapis.com/youtube/v3/search", params=params).json()
         if "items" in r:
-            # Ambil detail pake key yang sama yang berhasil
             ids = ",".join([x["id"]["videoId"] for x in r["items"]])
             stats = requests.get("https://www.googleapis.com/youtube/v3/videos", params={"part": "statistics,contentDetails,snippet", "id": ids, "key": key}).json()
             return stats, i, None
         err = r.get("error", {}).get("errors", [{}])[0].get("reason", "")
         last_error = r
-        if err in ["quotaExceeded", "dailyLimitExceeded"]:
-            continue  # Key habis, lanjut ke key berikutnya
-        else:
-            return None, i, r
+        if err in ["quotaExceeded", "dailyLimitExceeded"]: continue
+        else: return None, i, r
     return None, -1, last_error
 
 with st.sidebar:
@@ -129,17 +135,16 @@ with st.sidebar:
     cari = st.button("🔍 CARI")
 
 if cari:
-    if not st.session_state.api_keys:
-        st.error("Masukin dulu API Key di atas! Tanpa itu hasilnya NOL.")
+    if not st.session_state.api_keys: st.error("Masukin dulu API Key di atas!")
     else:
         published_after = (datetime.utcnow() - timedelta(days=total_hari)).isoformat("T") + "Z" if total_hari > 0 else None
         stats, idx_key, err = youtube_search_rotasi(keyword, published_after, st.session_state.api_keys)
         if stats is None:
-            if idx_key == -1: st.error(f"❌ SEMUA {len(st.session_state.api_keys)} API KEY HABIS KUOTANYA! Bikin key baru di Google Console, atau tunggu reset jam 00:00 WIB besok. Error: {err}")
+            if idx_key == -1: st.error(f"❌ SEMUA {len(st.session_state.api_keys)} API KEY HABIS KUOTANYA! Bikin baru / tunggu reset besok. {err}")
             else: st.error(f"API Error: {err}")
         else:
-            if idx_key > 0: st.warning(f"⚠️ Key 1 sampai {idx_key} habis, otomatis pindah ke Key {idx_key+1} yang masih ada kuota. Aman!")
-            else: st.success(f"✅ Pakai API Key ke-{idx_key+1} - Kuota masih ada")
+            if idx_key > 0: st.warning(f"⚠️ Key 1 sampai {idx_key} habis, otomatis pindah ke Key {idx_key+1}")
+            else: st.success(f"✅ Pakai API Key ke-{idx_key+1}")
             hasil = [v for v in stats.get("items", []) if views_min <= int(v["statistics"].get("viewCount", 0)) <= views_max]
             st.markdown(f"### Ditemukan: {len(hasil)} video")
             for v in hasil:
