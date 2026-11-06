@@ -3,50 +3,50 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="SnipeMe", page_icon="🎯", layout="wide")
 
-# ========== POPUP DONASI - TOMBOL DI DALAM KOTAK ==========
+# ========== POPUP 1x SAJA - DARI AWAL UDAH ADA 3 TOMBOL DI DALAM ==========
 if "masuk" not in st.session_state: st.session_state.masuk = False
 if "popup_start" not in st.session_state: st.session_state.popup_start = time.time()
 
 if not st.session_state.masuk:
     sisa = 6 - int(time.time() - st.session_state.popup_start)
+    if sisa < 0: sisa = 0
+    # 1 POPUP SAJA, GAK GANTI-GANTI. CUMA ANGKA DETIK & STATUS TOMBOL YANG GANTI
     if sisa > 0:
-        # FASE NGITUNG - BELUM ADA TOMBOL
-        st.markdown(f"""
-        <style>.stApp{{background-color:#033333 !important;}}
-        .popup-bg{{position:fixed;inset:0;background:#033333;z-index:9999;display:flex;justify-content:center;align-items:center;}}
-        .popup-box{{width:80vw;height:80vh;background:#004D4D;border:4px solid #ff6a00;border-radius:16px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;}}
-        .popup-box h1{{color:#ff6a00 !important;font-size:48px;margin:0;}} .popup-box p{{color:white !important;font-size:22px;font-weight:bold;}}
-        </style>
-        <div class="popup-bg"><div class="popup-box"><h1>🎯 SnipeMe</h1><p>Dukung biar tetap gratis! 🙏</p><p>Donasi dulu coy, app kebuka dalam {sisa} detik...</p><p>Tombol MASUK aktif setelah 6 detik, gak bisa di-skip!</p></div></div>
-        """, unsafe_allow_html=True)
-        st.markdown(f"### ⏳ Tunggu {sisa} detik...")
-        time.sleep(1); st.rerun()
+        teks_timer = f"Donasi dulu coy, app kebuka dalam {sisa} detik..."
+        teks_tombol = f"Tombol MASUK aktif setelah {sisa} detik, gak bisa di-skip!"
     else:
-        # FASE AKTIF - TOMBOL DI DALAM KOTAK, PERSIS KAYAK SS LU
-        st.markdown("""
-        <style>
-        .stApp{background-color:#033333 !important;}
-        /* Kotak popup 80% di tengah, dibikin tinggi + ada ruang bawah buat tombol */
-        .popup-box2{width:80%;margin:30px auto 0 auto;background:#004D4D;border:4px solid #ff6a00;border-radius:16px;padding:60px 20px 110px 20px;text-align:center;position:relative;}
-        .popup-box2 h1{color:#ff6a00 !important;font-size:48px;margin:0;} .popup-box2 p{color:white !important;font-size:22px;font-weight:bold;}
-        /* TARIK TOMBOL KE ATAS, MASUK KE DALAM KOTAK */
-        div[data-testid="stHorizontalBlock"]{width:80% !important;margin:-95px auto 0 auto !important;position:relative;z-index:10;}
-        div[data-testid="stLinkButton"] > a {background-color:#ff8c00 !important;border:2px solid #ff6a00 !important;height:55px !important;border-radius:10px !important;}
-        div[data-testid="stLinkButton"] p{color:white !important;font-size:18px !important;font-weight:bold !important;}
-        /* Tombol MASUK ijo kayak di SS lu */
-        button[data-testid="stBaseButton-secondary"]{background-color:#00e676 !important;border:2px solid #ff6a00 !important;height:55px !important;border-radius:10px !important;}
-        button[data-testid="stBaseButton-secondary"] p{color:#ff3b30 !important;font-size:18px !important;font-weight:bold !important;}
-        </style>
-        <div class="popup-box2"><h1>🎯 SnipeMe</h1><p>Dukung biar tetap gratis! 🙏</p><p>Donasi dulu coy, app kebuka dalam 0 detik...</p><p>Tombol MASUK aktif setelah 6 detik, gak bisa di-skip!</p></div>
-        """, unsafe_allow_html=True)
-        # TOMBOLNYA DITARIK KE DALAM KOTAK PAKE CSS DI ATAS (margin -95px)
-        c1,c2,c3 = st.columns(3)
-        with c1: st.link_button("DONASI", "https://saweria.co/mamangbora", use_container_width=True)
-        with c2:
-            if st.button("Masuk", use_container_width=True):
-                st.session_state.masuk = True; st.rerun()
-        with c3: st.link_button("MEDSOS", "https://facebook.com/mamangbora", use_container_width=True)
-        st.stop()
+        teks_timer = "Donasi dulu coy, app kebuka dalam 0 detik..."
+        teks_tombol = "Tombol MASUK udah aktif, silakan klik MASUK!"
+
+    st.markdown(f"""
+    <style>
+    .stApp{{background-color:#033333 !important;}}
+    /* 1 KOTAK SAJA, 80% TENGAH, UKURAN TETAP */
+    .popup-satu{{width:80%;margin:40px auto 0 auto;background:#004D4D;border:4px solid #ff6a00;border-radius:16px;padding:60px 20px 110px 20px;text-align:center;}}
+    .popup-satu h1{{color:#ff6a00 !important;font-size:48px;margin:0;}} .popup-satu p{{color:white !important;font-size:22px;font-weight:bold;}}
+    /* TOMBOL DITARIK MASUK KE DALAM KOTAK, POSISI TETAP */
+    div[data-testid="stHorizontalBlock"]{{width:80% !important;margin:-95px auto 0 auto !important;position:relative;z-index:10;}}
+    div[data-testid="stLinkButton"] > a {{background-color:#ff8c00 !important;border:2px solid #ff6a00 !important;height:55px !important;border-radius:10px !important;}}
+    div[data-testid="stLinkButton"] p{{color:white !important;font-size:18px !important;font-weight:bold !important;}}
+    button[data-testid="stBaseButton-secondary"]{{background-color:#00e676 !important;border:2px solid #ff6a00 !important;height:55px !important;border-radius:10px !important;}}
+    button[data-testid="stBaseButton-secondary"] p{{color:#ff3b30 !important;font-size:18px !important;font-weight:bold !important;}}
+    button[data-testid="stBaseButton-secondary"]:disabled{{background-color:#555555 !important;opacity:0.6;}}
+    </style>
+    <div class="popup-satu"><h1>🎯 SnipeMe</h1><p>Dukung biar tetap gratis! 🙏</p><p>{teks_timer}</p><p>{teks_tombol}</p></div>
+    """, unsafe_allow_html=True)
+
+    # 3 TOMBOL SELALU ADA DARI DETIK PERTAMA, DI DALAM KOTAK
+    c1,c2,c3 = st.columns(3)
+    with c1: st.link_button("DONASI", "https://saweria.co/mamangbora", use_container_width=True)
+    with c2:
+        # Kalau masih ngitung, tombol MASUK di-disable (gak bisa diklik). Kalau udah 0, baru aktif.
+        if st.button("Masuk", use_container_width=True, disabled=(sisa > 0)):
+            st.session_state.masuk = True; st.rerun()
+    with c3: st.link_button("MEDSOS", "https://facebook.com/mamangbora", use_container_width=True)
+
+    if sisa > 0:
+        time.sleep(1); st.rerun()
+    st.stop()
 
 # ========== APP UTAMA ==========
 st.markdown("""
