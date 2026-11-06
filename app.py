@@ -46,7 +46,7 @@ with c3: st.link_button("🔗 Medsos", "https://facebook.com/bodrohub")
 
 with st.sidebar:
     st.header("Filter Pencarian")
-    keyword = st.text_input("Keyword", "vlog")
+    keyword = st.text_input("Keyword", "--Masukin Kata Kunci---")
     views_min = st.number_input("Views Minimal", value=1000000)
     views_max = st.number_input("Views Maksimal", value=50000000)
     vph_min = st.number_input("VPH Minimal", value=10000)
