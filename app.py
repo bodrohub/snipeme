@@ -20,9 +20,7 @@ if not st.session_state.masuk:
     st.markdown(f"""
     <style>
     .stApp{{background-color:#033333 !important;}}
-    /* BACKGROUND GELAP FULL LAYAR */
     .popup-bg{{position:fixed;inset:0;background:#033333;z-index:9998;}}
-    /* KOTAK POPUP: 80% LEBAR x 80% TINGGI, PAS DI TENGAH LAYAR */
     .popup-satu{{
         position:fixed !important;
         top:50% !important; left:50% !important;
@@ -38,7 +36,6 @@ if not st.session_state.masuk:
     }}
     .popup-satu h1{{color:#ff6a00 !important;font-size:48px;margin:0;}}
     .popup-satu p{{color:white !important;font-size:22px;font-weight:bold;}}
-    /* TOMBOL: JUGA FIXED, DI TENGAH, NEMPEL DI DALAM KOTAK BAGIAN BAWAH */
     div[data-testid="stHorizontalBlock"]{{
         position:fixed !important;
         top:calc(50% + 28vh) !important;
@@ -57,7 +54,6 @@ if not st.session_state.masuk:
     <div class="popup-satu"><h1>🎯 SnipeMe</h1><p>Dukung biar tetap gratis! 🙏</p><p>{teks_timer}</p><p>{teks_tombol}</p></div>
     """, unsafe_allow_html=True)
 
-    # 3 TOMBOL SELALU ADA DARI DETIK PERTAMA, DI DALAM KOTAK
     c1,c2,c3 = st.columns(3)
     with c1: st.link_button("DONASI", "https://saweria.co/mamangbora", use_container_width=True)
     with c2:
@@ -106,7 +102,10 @@ st.markdown("""
 <p>Belum punya? Klik 👉 <a href="https://console.cloud.google.com/" target="_blank">🌐 Buka Google Cloud Console</a> - Bikin Project > Library > Aktifkan YouTube Data API v3 > Credentials > Create API Key</p>
 </div>
 """, unsafe_allow_html=True)
-api_text = st.text_area("Tempel API Key di sini (1 baris 1 key)", value="\n".join(st.session_state.api_keys), type="password", placeholder="AIza...Key1\nAIza...Key2", height=100)
+
+# INI YANG GUE BENERIN - HAPUS type="password" KARENA text_area GAK SUPPORT
+api_text = st.text_area("Tempel API Key di sini (1 baris 1 key)", value="\n".join(st.session_state.api_keys), placeholder="AIza...Key1\nAIza...Key2", height=100)
+
 col_simpan, col_hapus = st.columns([1,1])
 with col_simpan:
     if st.button("💾 SIMPAN SEMUA API KEY"):
