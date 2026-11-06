@@ -3,34 +3,21 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="SnipeMe", page_icon="🎯", layout="wide")
 
-# ========== POPUP 1x - TIMER 9.999.999 -> 0 DALAM 5 DETIK ==========
+# ========== POPUP - TIMER 9.999.999 -> 0 DALAM 5 DETIK ==========
 if "masuk" not in st.session_state: st.session_state.masuk = False
 if "popup_start" not in st.session_state: st.session_state.popup_start = time.time()
 
 if not st.session_state.masuk:
     elapsed = time.time() - st.session_state.popup_start
-    total_durasi = 5.0
-    # Hitung mundur 9.999.999 -> 0 dalam 5 detik
-    if elapsed >= total_durasi:
-        angka = 0
-        sisa_detik = 0
-    else:
-        angka = int(9999999 * (1 - elapsed / total_durasi))
-        sisa_detik = total_durasi - elapsed
-    # Format pake titik: 9.999.999
+    if elapsed >= 5.0: angka = 0
+    else: angka = int(9999999 * (1 - elapsed / 5.0))
     angka_str = f"{angka:,}".replace(",", ".")
-
-    if angka > 0:
-        teks_bawah = f"Tombol MASUK aktif setelah angka jadi 0, gak bisa di-skip!"
-    else:
-        teks_bawah = "Angka udah 0! Silakan klik MASUK!"
-
+    teks_bawah = "Tombol MASUK aktif setelah angka jadi 0, gak bisa di-skip!" if angka > 0 else "Angka udah 0! Silakan klik MASUK!"
     st.markdown(f"""
     <style>
     .stApp{{background-color:#033333 !important;}}
     .popup-bg{{position:fixed;inset:0;background:#033333;z-index:9998;}}
     .popup-satu{{position:fixed !important;top:50% !important;left:50% !important;transform:translate(-50%,-50%) !important;width:80vw !important;height:80vh !important;background:#004D4D !important;border:4px solid #ff6a00 !important;border-radius:16px !important;display:flex !important;flex-direction:column !important;justify-content:center !important;align-items:center !important;text-align:center !important;z-index:9999 !important;padding:20px !important;}}
-    /* ANGKA TIMER GEDE PUTIH TEBAL DI ATAS SNIPEME */
     .angka-timer{{color:white !important;font-size:72px !important;font-weight:900 !important;letter-spacing:2px !important;margin:0 !important;line-height:1 !important;}}
     .popup-satu h1{{color:#ff6a00 !important;font-size:48px;margin:10px 0 0 0;}} .popup-satu p{{color:white !important;font-size:22px;font-weight:bold;}}
     div[data-testid="stHorizontalBlock"]{{position:fixed !important;top:calc(50% + 28vh) !important;left:50% !important;transform:translateX(-50%) !important;width:76vw !important;z-index:10000 !important;}}
@@ -49,15 +36,13 @@ if not st.session_state.masuk:
         if st.button("Masuk", use_container_width=True, disabled=(angka > 0)):
             st.session_state.masuk = True; st.rerun()
     with c3: st.link_button("MEDSOS", "https://facebook.com/mamangbora", use_container_width=True)
-    if angka > 0:
-        time.sleep(0.05); st.rerun()
+    if angka > 0: time.sleep(0.05); st.rerun()
     st.stop()
 
-# ========== SEMBUNYIIN MANAGE APP + TOOLBAR + FOOTER - VERSI GALAK ==========
+# ========== STYLE + SEMBUNYIIN MANAGE APP ==========
 st.markdown("""
 <style>
-/* HAPUS TOTAL semua bawaan Streamlit */
-[data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"], [data-testid="stAppDeployButton"], .stAppDeployButton, div:has(> button[data-testid="stAppDeployButton"]), footer, #MainMenu, header[data-testid="stHeader"], [data-testid="stHeader"]{display:none !important;visibility:hidden !important;height:0 !important;opacity:0 !important;pointer-events:none !important;}
+[data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"], [data-testid="stAppDeployButton"], .stAppDeployButton, footer, #MainMenu, header[data-testid="stHeader"]{display:none !important;visibility:hidden !important;height:0 !important;opacity:0 !important;pointer-events:none !important;}
 .stApp{background-color:#033333 !important;}
 section[data-testid="stSidebar"]{background-color:#022222 !important;}
 section[data-testid="stSidebar"] label, section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3, section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span, section[data-testid="stSidebar"] div{color:#ff6a00 !important;font-weight:bold !important;}
@@ -87,42 +72,47 @@ def mask_key(k):
     if len(k) <= 6: return k[:3] + "..." + k[-3:]
     return k[:3] + "." * (len(k)-6) + k[-3:]
 
-# ========== HALAMAN UTAMA KOSONG POLOS - CUMA GEAR KIRI BAWAH ==========
-# Gear cuma 1, di kiri bawah, pake CSS fixed biar nempel terus
+# ========== SIDEBAR - SELALU TERLIHAT, GEAR DI KIRI BAWAH SIDEBAR ==========
+with st.sidebar:
+    st.header("Filter Pencarian")
+    keyword = st.text_input("Keyword", "vlog")
+    views_min = st.number_input("Views Minimal", value=1000000)
+    views_max = st.number_input("Views Maksimal", value=50000000)
+    vph_min = st.number_input("VPH Minimal", value=10000)
+    durasi_min = st.text_input("Durasi Min (menit)", "0")
+    durasi_max = st.text_input("Durasi Max (menit)", "60")
+    st.markdown("### ⏰ Waktu Upload")
+    col_h, col_m = st.columns(2)
+    with col_h: hari = st.number_input("Hari Terakhir", min_value=0, max_value=3650, value=0)
+    with col_m: minggu = st.number_input("Minggu Terakhir", min_value=0, max_value=1040, value=0)
+    col_b, col_t = st.columns(2)
+    with col_b: bulan = st.number_input("Bulan Terakhir", min_value=0, max_value=240, value=0)
+    with col_t: tahun = st.number_input("Tahun Terakhir", min_value=0, max_value=20, value=0)
+    total_hari = hari + (minggu*7) + (bulan*30) + (tahun*365)
+    if total_hari > 0: st.markdown(f'<div class="box-putih"><p>Waktu Upload: {total_hari} hari terakhir</p></div>', unsafe_allow_html=True)
+    else: st.markdown('<div class="box-putih"><p>Waktu Upload: Semua (dari 20 tahun kebelakang)</p></div>', unsafe_allow_html=True)
+    cari = st.button("🔍 CARI", use_container_width=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+    # INI TOMBOL GEAR-NYA - DI DALAM SIDEBAR, DI BAWAH CARI, KIRI BAWAH
+    if st.button("⚙️", key="gear_sidebar", use_container_width=False):
+        st.session_state.show_settings = not st.session_state.show_settings
+        st.rerun()
+
+# CSS khusus buat gear di sidebar biar gede & keliatan - di kiri bawah sidebar
 st.markdown("""
 <style>
-/* GEAR KIRI BAWAH - 1 DOANG, GEDE */
-div[data-testid="stHorizontalBlock"]{display:flex !important;}
-.gear-wrap{position:fixed;left:16px;bottom:16px;z-index:9999;}
-</style>
-<div class="gear-wrap"></div>
-""", unsafe_allow_html=True)
-
-# Tombol gear asli (Streamlit) - kita bikin dia jadi melayang kiri bawah via kolom kosong
-col_kosong, col_gear = st.columns([10,1])
-with col_gear:
-    pass
-
-# Cara paling aman: taro gear di bawah pake container kosong, terus CSS fixed-in
-# Kita pake st.button biasa tapi kita posisikan fixed lewat CSS di bawah
-gear_clicked = st.button("⚙️", key="gear_satu_satunya")
-st.markdown("""
-<style>
-/* Bikin tombol gear_satu_satunya jadi melayang kiri bawah, gede */
-button[key="gear_satu_satunya"]{position:fixed !important;left:16px !important;bottom:16px !important;width:64px !important;height:64px !important;background:#FF6A00 !important;border:3px solid white !important;border-radius:50% !important;z-index:9999 !important;box-shadow:0 4px 12px rgba(0,0,0,0.6) !important;}
-button[key="gear_satu_satunya"] p{font-size:30px !important;line-height:1 !important;}
-/* Sembunyiin tombol gear duplikat yang kemarin muncul di atas */
+/* Gear di sidebar - gede, oren, bulet */
+section[data-testid="stSidebar"] button[key="gear_sidebar"]{background-color:#FF6A00 !important;border:3px solid white !important;border-radius:50% !important;width:56px !important;height:56px !important;min-width:56px !important;}
+section[data-testid="stSidebar"] button[key="gear_sidebar"] p{font-size:28px !important;line-height:1 !important;}
 </style>
 """, unsafe_allow_html=True)
-if gear_clicked:
-    st.session_state.show_settings = not st.session_state.show_settings
-    st.rerun()
 
-# Kalau gear BELUM diklik, halaman STOP di sini - KOSONG POLOS, cuma gear
+# ========== SPACE UTAMA - KOSONG POLOS KALAU GEAR BELUM DIKLIK ==========
 if not st.session_state.show_settings:
+    # Jangan tampilin apa-apa di tengah, biarin kosong polos kayak SS lu
     st.stop()
 
-# ========== BARU MUNCUL KALAU GEAR DIKLIK ==========
+# ========== BARU MUNCUL KALAU GEAR DI SIDEBAR DIKLIK ==========
 h1,h2,h3 = st.columns([2,1,1])
 with h1: st.markdown("""<div class="banner-snipe"><h1>🎯 SnipeMe</h1><p>Cari video viral dari 20 tahun kebelakang</p></div>""", unsafe_allow_html=True)
 with h2: st.link_button("❤️ DONASI", "https://saweria.co/mamangbora", use_container_width=True)
@@ -136,7 +126,6 @@ div[data-testid="stHorizontalBlock"] > div:nth-child(3) a p{color:white !importa
 </style>
 """, unsafe_allow_html=True)
 
-# ========== PENGATURAN - MUNCUL BARENG GEAR ==========
 st.markdown("""
 <div class="box-api">
 <p><b>⚙️ PENGATURAN - YouTube API Key</b></p>
@@ -193,28 +182,8 @@ def youtube_search_rotasi(keyword, published_after, api_keys):
         else: return None, i, r
     return None, -1, last_error
 
-with st.sidebar:
-    st.header("Filter Pencarian")
-    keyword = st.text_input("Keyword", "vlog")
-    views_min = st.number_input("Views Minimal", value=1000000)
-    views_max = st.number_input("Views Maksimal", value=50000000)
-    vph_min = st.number_input("VPH Minimal", value=10000)
-    durasi_min = st.text_input("Durasi Min (menit)", "0")
-    durasi_max = st.text_input("Durasi Max (menit)", "60")
-    st.markdown("### ⏰ Waktu Upload")
-    col_h, col_m = st.columns(2)
-    with col_h: hari = st.number_input("Hari Terakhir", min_value=0, max_value=3650, value=0)
-    with col_m: minggu = st.number_input("Minggu Terakhir", min_value=0, max_value=1040, value=0)
-    col_b, col_t = st.columns(2)
-    with col_b: bulan = st.number_input("Bulan Terakhir", min_value=0, max_value=240, value=0)
-    with col_t: tahun = st.number_input("Tahun Terakhir", min_value=0, max_value=20, value=0)
-    total_hari = hari + (minggu*7) + (bulan*30) + (tahun*365)
-    if total_hari > 0: st.markdown(f'<div class="box-putih"><p>Waktu Upload: {total_hari} hari terakhir</p></div>', unsafe_allow_html=True)
-    else: st.markdown('<div class="box-putih"><p>Waktu Upload: Semua (dari 20 tahun kebelakang)</p></div>', unsafe_allow_html=True)
-    cari = st.button("🔍 CARI")
-
 if cari:
-    if not st.session_state.api_keys: st.error("API Key belum ada! Klik ⚙️ GEAR kiri bawah > TAMBAH > isi Key > SIMPAN.")
+    if not st.session_state.api_keys: st.error("API Key belum ada! Klik ⚙️ GEAR di sidebar kiri bawah > TAMBAH > isi Key > SIMPAN.")
     else:
         published_after = (datetime.utcnow() - timedelta(days=total_hari)).isoformat("T") + "Z" if total_hari > 0 else None
         stats, idx_key, err = youtube_search_rotasi(keyword, published_after, st.session_state.api_keys)
